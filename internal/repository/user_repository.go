@@ -17,20 +17,21 @@ const (
 )
 
 //go:generate mockgen -source=user_repository.go -destination=../mock/user_repository.go -package=mock UserRepository
+
 type UserRepository interface {
 	UpdateUser(ctx context.Context, user *UpdateUserRequest) error
-	GetUserByID(ctx context.Context, id int) (*entity.User, error)
+	GetUserByID(ctx context.Context, id int64) (*entity.User, error)
 }
 
 func NewUserRepository(db *sql.DB) UserRepository {
-	return &repository{db: db}
+	return &userRepo{db: db}
 }
 
-type repository struct {
+type userRepo struct {
 	db *sql.DB
 }
 
-func (r *repository) UpdateUser(ctx context.Context, req *UpdateUserRequest) error {
+func (r *userRepo) UpdateUser(ctx context.Context, req *UpdateUserRequest) error {
 	var (
 		queryParams []string
 		values      []any
@@ -78,6 +79,14 @@ func (r *repository) UpdateUser(ctx context.Context, req *UpdateUserRequest) err
 	return nil
 }
 
-func (r *repository) GetUserByID(ctx context.Context, id int) (*entity.User, error) {
-	return nil, nil
+func (r *userRepo) GetUserByID(ctx context.Context, id int64) (*entity.User, error) {
+	var user entity.User
+	err := r.db.QueryRowContext(ctx,
+		"SELECT id, name, email, phone FROM users WHERE id = $1", id).
+		Scan(&user.ID, &user.Name, &user.Email, &user.Phone)
+
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

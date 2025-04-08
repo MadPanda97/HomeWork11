@@ -9,3 +9,13 @@ type Product struct {
 	SKU         string
 	Amount      int64
 }
+
+type CreateProductRequest struct {
+	ID          int
+	Name        string
+	Price       int64
+	Weight      int64
+	Description string
+	SKU         string
+	Amount      int64
+}

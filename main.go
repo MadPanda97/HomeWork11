@@ -45,4 +45,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	productsRepository := repository.NewProductRepository(db)
+	productsService := service.NewProductService(productsRepository)
+
+	ps := server.NewServer(productsService)
+	es := ps.SetupRouter()
+
+	err = es.Run(cfg.Port)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

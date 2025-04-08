@@ -9,17 +9,18 @@ import (
 
 type UserService interface {
 	UpdateUser(ctx context.Context, user *entity.UpdateUserRequest) error
+	GetUserByID(ctx context.Context, id int64) (*entity.User, error)
 }
 
-type service struct {
+type userService struct {
 	r repository.UserRepository
 }
 
 func NewUserService(r repository.UserRepository) UserService {
-	return &service{r: r}
+	return &userService{r: r}
 }
 
-func (s *service) UpdateUser(ctx context.Context, req *entity.UpdateUserRequest) error {
+func (s *userService) UpdateUser(ctx context.Context, req *entity.UpdateUserRequest) error {
 	if req.ID == 0 {
 		return entity.ErrorInvalidParams
 	}
@@ -48,4 +49,12 @@ func (s *service) UpdateUser(ctx context.Context, req *entity.UpdateUserRequest)
 	}
 
 	return nil
+}
+
+func (s *userService) GetUserByID(ctx context.Context, id int64) (*entity.User, error) {
+	user, err := s.r.GetUserByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %w", entity.ErrorUserNotFound, err)
+	}
+	return user, nil
 }
